@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class plundger : MonoBehaviour
 {
@@ -17,7 +18,10 @@ public class plundger : MonoBehaviour
     [SerializeField]
     private Rigidbody m_attachedBody = null;
     [SerializeField]
-    private bool m_bIsBungee = false;
+    private Image forceBar;
+    float MAX_FORCE;
+    private bool hasLanched = false;
+
 
     private Vector3 m_attachedBodyinicialPos;
 
@@ -28,7 +32,7 @@ public class plundger : MonoBehaviour
     private Vector3 m_vForce;
     private Vector3 m_vPrevVel;
 
-    // Start is called before the first frame update
+ 
     void Start()
     {
         m_fMass = m_attachedBody.mass;
@@ -38,42 +42,50 @@ public class plundger : MonoBehaviour
         m_vRestPos = anchorTransform.position;
 
         m_attachedBodyinicialPos = m_attachedBody.position;
+
+        //MAX_FORCE = (-m_fSpringConstant * (m_vRestPos - m_attachedBody.transform.position) -
+        // m_fDampingConstant * (m_attachedBody.velocity - m_vPrevVel)).magnitude;
+        hideForce();
     }
 
     Vector3 calculateForce(float time)
     {
-
-        float HoldComponent = Mathf.Clamp01(time / maxHoldTime);
-
-
-        return -m_fSpringConstant * (m_vRestPos - m_attachedBody.transform.position) -
-            m_fDampingConstant * (m_attachedBody.velocity - m_vPrevVel) * HoldComponent;
+  
+        return (-m_fSpringConstant * (m_vRestPos - m_attachedBody.transform.position) -
+            m_fDampingConstant * (m_attachedBody.velocity - m_vPrevVel)) * calculateHoldComponent(time);
     }
-    // Update is called once per frame
+    float calculateHoldComponent(float time)
+    {
+        return Mathf.Clamp01(time / maxHoldTime);
+    }
     void Update()
     {
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) && !hasLanched)
         {
             startTime = Time.time;
+           
         }
-        if (Input.GetKeyUp(KeyCode.Space))
+        if (Input.GetKey(KeyCode.Space) && !hasLanched)
+        {
+            showForce(Time.time - startTime);
+        }
+        if (Input.GetKeyUp(KeyCode.Space) && !hasLanched)
         {
             ReleaseTime = Time.time;
 
             m_vForce = calculateForce((ReleaseTime - startTime));
 
-            m_attachedBody.AddForce(m_vForce, ForceMode.Acceleration);
+            hideForce();
 
+            m_attachedBody.AddForce(m_vForce, ForceMode.Acceleration);
+            hasLanched = false;
             m_vPrevVel = m_attachedBody.velocity;
         }
     }
 
     private float CalculateSpringConstant()
     {
-        // k = F / dX
-        // F = m * a
-        // k = m * a / (xf - xi)
 
         float fDX = (m_vRestPos - m_attachedBody.transform.position).magnitude;
 
@@ -94,5 +106,13 @@ public class plundger : MonoBehaviour
         }
     }
 
-  
+    void showForce(float time)
+    {
+        forceBar.fillAmount = time / maxHoldTime;
+    }
+    void hideForce()
+    {
+        forceBar.fillAmount = 0;
+    }
+
 }
