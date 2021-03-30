@@ -7,11 +7,14 @@ public class BallBehavior : MonoBehaviour
 {
     private Rigidbody ball;
     public float m_fScore;
+    private bool m_bIsReseting = false;
+    AudioManager audioManager;
     
 
     // Start is called before the first frame update
     void Start()
     {
+        audioManager = GameObject.Find("GM").GetComponent<AudioManager>();
         m_fScore = 0.0f;
         ball = GetComponent<Rigidbody>();
     }
@@ -24,6 +27,8 @@ public class BallBehavior : MonoBehaviour
         {
             StartCoroutine(ResetBall());
         }
+
+       
         
     }
 
@@ -35,26 +40,31 @@ public class BallBehavior : MonoBehaviour
         {
             ReflectProjectile(ball, collision.contacts[0].normal, 2.0f);
             m_fScore += 50.0f;
-
+           
         }
 
         if (collision.gameObject.tag == "bPassive")//collision with passive bumper
         {
             ReflectProjectile(ball, collision.contacts[0].normal, 0.9f);
             m_fScore += 25.0f;
+            
         }
 
         if (collision.gameObject.tag == "bBashToy")//collision with Bashtoy
         {
-            m_fScore += 500.0f;
+            m_fScore += 1500.0f;
+            audioManager.Play("bashtoy");
         }
 
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        StartCoroutine(ResetBall());
-        Debug.Log("Reset");
+        if(!m_bIsReseting)
+        {
+            m_bIsReseting = true;
+            StartCoroutine(ResetBall());
+        }
     }
 
     private void ReflectProjectile(Rigidbody ball, Vector3 reflectVector, float multiplier)
@@ -68,6 +78,8 @@ public class BallBehavior : MonoBehaviour
 
         ball.transform.position = new Vector3(7.73f, 1.24f, 16.39f);
         ball.velocity = Vector3.zero;
+        m_fScore -= 1000;
+        m_bIsReseting = false;
     }
    
 }

@@ -9,12 +9,14 @@ public class flipers : MonoBehaviour
     public float fliperDampper = 150f;
     public float restPos;
     public float hitPos;
+    private AudioManager audioManager;
 
 
     private HingeJoint hinge;
     public string inputName;
     void Start()
     {
+        audioManager = GameObject.Find("GM").GetComponent<AudioManager>();
         hinge = GetComponent<HingeJoint>();
         hinge.useSpring = true;
     }
@@ -37,6 +39,19 @@ public class flipers : MonoBehaviour
         else
         {
             spring.targetPosition = restPos;
+          
+        }
+        //get imput for sounds
+        if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.Semicolon))
+        {
+            audioManager.Play("flipper");
+        }
+        //esc to leave game
+        if (Input.GetKey(KeyCode.Escape))
+        {
+            
+            Application.Quit();
+           
         }
 
         hinge.spring = spring;

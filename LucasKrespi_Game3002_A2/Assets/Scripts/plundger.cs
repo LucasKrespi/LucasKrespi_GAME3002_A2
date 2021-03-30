@@ -19,8 +19,8 @@ public class plundger : MonoBehaviour
     private Rigidbody m_attachedBody = null;
     [SerializeField]
     private Image forceBar;
-    float MAX_FORCE;
     private bool hasLanched = false;
+    AudioManager audioManager;
 
 
     private Vector3 m_attachedBodyinicialPos;
@@ -43,9 +43,9 @@ public class plundger : MonoBehaviour
 
         m_attachedBodyinicialPos = m_attachedBody.position;
 
-        //MAX_FORCE = (-m_fSpringConstant * (m_vRestPos - m_attachedBody.transform.position) -
-        // m_fDampingConstant * (m_attachedBody.velocity - m_vPrevVel)).magnitude;
         hideForce();
+
+        audioManager = GameObject.Find("GM").GetComponent<AudioManager>();
     }
 
     Vector3 calculateForce(float time)
@@ -81,6 +81,7 @@ public class plundger : MonoBehaviour
             m_attachedBody.AddForce(m_vForce, ForceMode.Acceleration);
             hasLanched = false;
             m_vPrevVel = m_attachedBody.velocity;
+            audioManager.Play("plundger");
         }
     }
 
